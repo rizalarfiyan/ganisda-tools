@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"ganisda-email-sender/utils"
 	"log"
 	"os"
 
@@ -10,6 +11,11 @@ import (
 )
 
 func main() {
+	config, err := utils.LoadConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	app := &cli.App{
 		Commands: []*cli.Command{
 			{
@@ -18,6 +24,7 @@ func main() {
 				Usage:   "run command for make pdf files",
 				Action: func(c *cli.Context) error {
 					fmt.Println("run command for make pdf files")
+					fmt.Println(config)
 					return nil
 				},
 			},
@@ -40,7 +47,7 @@ func main() {
 		},
 	}
 
-	err := app.Run(os.Args)
+	err = app.Run(os.Args)
 	if err != nil {
 		log.Fatal(err)
 	}
