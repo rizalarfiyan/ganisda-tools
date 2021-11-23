@@ -3,7 +3,8 @@ package main
 import (
 	"errors"
 	"fmt"
-	"ganisda-email-sender/utils"
+	"ganisda-email-sender/app"
+	"ganisda-email-sender/config"
 	"log"
 	"os"
 
@@ -11,7 +12,7 @@ import (
 )
 
 func main() {
-	config, err := utils.LoadConfig()
+	config, err := config.LoadConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -24,7 +25,6 @@ func main() {
 				Usage:   "run command for make pdf files",
 				Action: func(c *cli.Context) error {
 					fmt.Println("run command for make pdf files")
-					fmt.Println(config)
 					return nil
 				},
 			},
@@ -40,7 +40,11 @@ func main() {
 					if files == "" {
 						return errors.New("missing argument 1, file excel does'n exist")
 					}
-					fmt.Println("run command for sender email")
+
+					err := app.NewMailApp(config).Run()
+					if err != nil {
+						return err
+					}
 					return nil
 				},
 			},

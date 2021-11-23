@@ -1,4 +1,4 @@
-package utils
+package config
 
 import (
 	"encoding/json"
@@ -6,10 +6,6 @@ import (
 	"io/ioutil"
 	"os"
 )
-
-type Config struct {
-	UserEmail string `json:"user_email"`
-}
 
 func LoadConfig() (*Config, error) {
 	jsonFile, err := os.Open("config.json")
