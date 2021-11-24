@@ -24,13 +24,23 @@ func NewMailApp(conf *config.Config) AppMail {
 }
 
 func (a *appMail) Run() error {
+	file := a.mail.GetCSVLocation()
+	data, err := a.mail.ReadMailCSV(file)
+	if err != nil {
+		return err
+	}
+
+	//! not include Validate Files
+	if err = a.mail.ValidateMailCSV(data); err != nil {
+		return err
+	}
 
 	filed := mail.TemplateField{
 		Title: "Ini adalah judul",
 		Name:  "Muhamad Rizal Arfiyan",
 	}
 
-	_, err := a.mail.GenerateTemplate(filed)
+	_, err = a.mail.GenerateTemplate(filed)
 	if err != nil {
 		return err
 	}
@@ -44,7 +54,8 @@ func (a *appMail) Generate() error {
 		return err
 	}
 
-	err = a.mail.GenerateMailCSV()
+	file := a.mail.GetCSVLocation()
+	err = a.mail.GenerateMailCSV(file)
 	if err != nil {
 		return err
 	}

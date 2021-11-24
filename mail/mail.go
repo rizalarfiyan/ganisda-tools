@@ -21,7 +21,10 @@ type mailService struct {
 type MailService interface {
 	GetTemplate() (*string, error)
 	GenerateTemplate(TemplateField) (*string, error)
-	GenerateMailCSV() error
+	GenerateMailCSV(string) error
+	GetCSVLocation() string
+	ReadMailCSV(string) ([][]string, error)
+	ValidateMailCSV([][]string) error
 }
 
 func NewMailService(conf *config.Config) MailService {
@@ -82,16 +85,19 @@ func (m *mailService) htmlMinifier(html string) string {
 	return re.ReplaceAllString(html, "")
 }
 
-func (m *mailService) GenerateMailCSV() error {
+func (m *mailService) GetCSVLocation() string {
 	fileName := fmt.Sprint(m.config.ListData, ".", listDataExtension)
 	filePath := path.Join(".", m.config.DataLocation, fileName)
+	return filePath
+}
 
+func (m *mailService) GenerateMailCSV(filePath string) error {
 	if utils.FileIsExist(filePath) {
 		return errListDataIsAlready
 	}
 
 	strCSV := [][]string{
-		{"Nama lengkap", "Email", "File Certicate"},
+		{"Email", "Nama lengkap", "File Certicate"},
 	}
 
 	f, err := os.Create(filePath)
@@ -106,5 +112,49 @@ func (m *mailService) GenerateMailCSV() error {
 		return err
 	}
 
+	return nil
+}
+
+func (m *mailService) ReadMailCSV(fileName string) ([][]string, error) {
+	f, err := os.Open(fileName)
+
+	if err != nil {
+		return [][]string{}, err
+	}
+
+	defer f.Close()
+	r := csv.NewReader(f)
+	if _, err := r.Read(); err != nil {
+		return [][]string{}, err
+	}
+
+	result, err := r.ReadAll()
+
+	if err != nil {
+		return [][]string{}, err
+	}
+
+	return result, nil
+}
+
+func (m *mailService) ValidateMailCSV(data [][]string) error {
+	var errorRow []string
+	for idx, col := range data {
+		numCol := idx + 2
+		if utils.IsEmail(col[0]) {
+			row := fmt.Sprint("A", numCol)
+			errorRow = append(errorRow, fmt.Sprintf(errRowEmail, row))
+		}
+		if utils.IsAlphaSpace(col[1]) {
+			row := fmt.Sprint("B", numCol)
+			errorRow = append(errorRow, fmt.Sprintf(errRowEmail, row))
+		}
+	}
+	if len(errorRow) != 0 {
+		for _, val := range errorRow {
+			fmt.Println(val)
+		}
+		return errInvalidCSV
+	}
 	return nil
 }
