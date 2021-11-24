@@ -1,5 +1,7 @@
 {
   "user_email": "rizal.arfiyan.23@gmail.com",
   "template_location": "template",
-  "template_file": "base"
+  "template_file": "base",
+  "data_location": "dist",
+  "list_data": "users"
 }

@@ -3,6 +3,7 @@ package app
 import (
 	"ganisda-email-sender/config"
 	"ganisda-email-sender/mail"
+	"ganisda-email-sender/utils"
 )
 
 type appMail struct {
@@ -12,6 +13,7 @@ type appMail struct {
 
 type AppMail interface {
 	Run() error
+	Generate() error
 }
 
 func NewMailApp(conf *config.Config) AppMail {
@@ -29,6 +31,20 @@ func (a *appMail) Run() error {
 	}
 
 	_, err := a.mail.GenerateTemplate(filed)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (a *appMail) Generate() error {
+	err := utils.CreateDirectory(a.config.DataLocation)
+	if err != nil {
+		return err
+	}
+
+	err = a.mail.GenerateMailCSV()
 	if err != nil {
 		return err
 	}

@@ -21,3 +21,6 @@
 
 ### Config ###
 config.json
+
+### File Dist ###
+/dist

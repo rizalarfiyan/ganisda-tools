@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"ganisda-email-sender/app"
 	"ganisda-email-sender/config"
@@ -33,15 +32,19 @@ func main() {
 				Aliases: []string{"m"},
 				Usage:   "run command for sender email",
 				Action: func(c *cli.Context) error {
-					var files string
-					if c.NArg() > 0 {
-						files = c.Args().Get(0)
-					}
-					if files == "" {
-						return errors.New("missing argument 1, file excel does'n exist")
-					}
-
 					err := app.NewMailApp(config).Run()
+					if err != nil {
+						return err
+					}
+					return nil
+				},
+			},
+			{
+				Name:    "generate",
+				Aliases: []string{"g"},
+				Usage:   "run command for generate csv template.",
+				Action: func(c *cli.Context) error {
+					err := app.NewMailApp(config).Generate()
 					if err != nil {
 						return err
 					}

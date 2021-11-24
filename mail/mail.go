@@ -2,10 +2,13 @@ package mail
 
 import (
 	"bytes"
+	"encoding/csv"
 	"fmt"
 	"ganisda-email-sender/config"
+	"ganisda-email-sender/utils"
 	"html/template"
 	"io/ioutil"
+	"os"
 	"path"
 	"path/filepath"
 	"regexp"
@@ -18,6 +21,7 @@ type mailService struct {
 type MailService interface {
 	GetTemplate() (*string, error)
 	GenerateTemplate(TemplateField) (*string, error)
+	GenerateMailCSV() error
 }
 
 func NewMailService(conf *config.Config) MailService {
@@ -76,4 +80,31 @@ func (m *mailService) GenerateTemplate(field TemplateField) (*string, error) {
 func (m *mailService) htmlMinifier(html string) string {
 	re := regexp.MustCompile(`(?m)<!--(.*?)-->|\s\B`)
 	return re.ReplaceAllString(html, "")
+}
+
+func (m *mailService) GenerateMailCSV() error {
+	fileName := fmt.Sprint(m.config.ListData, ".", listDataExtension)
+	filePath := path.Join(".", m.config.DataLocation, fileName)
+
+	if utils.FileIsExist(filePath) {
+		return errListDataIsAlready
+	}
+
+	strCSV := [][]string{
+		{"Nama lengkap", "Email", "File Certicate"},
+	}
+
+	f, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	w := csv.NewWriter(f)
+	err = w.WriteAll(strCSV)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
