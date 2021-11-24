@@ -91,13 +91,19 @@ func (m *mailService) GetCSVLocation() string {
 	return filePath
 }
 
+func (m *mailService) GetUserFileLocation(name string) string {
+	fileName := fmt.Sprint(m.config.PrefixName, " - ", name, ".", m.config.ExtensionName)
+	filePath := path.Join(".", m.config.DataLocation, m.config.FileLocation, fileName)
+	return filePath
+}
+
 func (m *mailService) GenerateMailCSV(filePath string) error {
 	if utils.FileIsExist(filePath) {
 		return errListDataIsAlready
 	}
 
 	strCSV := [][]string{
-		{"Email", "Nama lengkap", "File Certicate"},
+		{"Email", "Nama lengkap"},
 	}
 
 	f, err := os.Create(filePath)
@@ -141,13 +147,19 @@ func (m *mailService) ValidateMailCSV(data [][]string) error {
 	var errorRow []string
 	for idx, col := range data {
 		numCol := idx + 2
-		if utils.IsEmail(col[0]) {
+		email := col[0]
+		name := col[1]
+
+		if utils.IsEmail(email) {
 			row := fmt.Sprint("A", numCol)
 			errorRow = append(errorRow, fmt.Sprintf(errRowEmail, row))
 		}
-		if utils.IsAlphaSpace(col[1]) {
+		if utils.IsAlphaSpace(name) {
 			row := fmt.Sprint("B", numCol)
-			errorRow = append(errorRow, fmt.Sprintf(errRowEmail, row))
+			errorRow = append(errorRow, fmt.Sprintf(errRowFullName, row))
+		}
+		if !utils.FileIsExist(m.GetUserFileLocation(name)) {
+			errorRow = append(errorRow, fmt.Sprintf(errFileUserNotFound, name))
 		}
 	}
 	if len(errorRow) != 0 {
