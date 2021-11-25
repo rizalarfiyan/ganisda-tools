@@ -2,7 +2,6 @@ package config
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 )
@@ -13,7 +12,6 @@ func LoadConfig() (*Config, error) {
 		return nil, err
 	}
 
-	fmt.Println("Successfully opened config.json")
 	defer jsonFile.Close()
 	byteValue, _ := ioutil.ReadAll(jsonFile)
 

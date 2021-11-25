@@ -1,4 +1,4 @@
-module ganisda-email-sender
+module ganisda-tools
 
 go 1.16
 

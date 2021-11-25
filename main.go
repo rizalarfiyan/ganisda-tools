@@ -1,9 +1,8 @@
 package main
 
 import (
-	"fmt"
-	"ganisda-email-sender/app"
-	"ganisda-email-sender/config"
+	"ganisda-tools/app"
+	"ganisda-tools/config"
 	"log"
 	"os"
 
@@ -18,15 +17,6 @@ func main() {
 
 	app := &cli.App{
 		Commands: []*cli.Command{
-			{
-				Name:    "pdf",
-				Aliases: []string{"p"},
-				Usage:   "run command for make pdf files",
-				Action: func(c *cli.Context) error {
-					fmt.Println("run command for make pdf files")
-					return nil
-				},
-			},
 			{
 				Name:    "mail",
 				Aliases: []string{"m"},

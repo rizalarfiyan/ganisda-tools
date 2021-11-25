@@ -1,9 +1,9 @@
 package app
 
 import (
-	"ganisda-email-sender/config"
-	"ganisda-email-sender/mail"
-	"ganisda-email-sender/utils"
+	"ganisda-tools/config"
+	"ganisda-tools/mail"
+	"ganisda-tools/utils"
 	"sync"
 )
 
