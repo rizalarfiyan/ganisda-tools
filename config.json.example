@@ -1,5 +1,11 @@
 {
-  "user_email": "rizal.arfiyan.23@gmail.com",
+  "mail_host": "smtp.gmail.com",
+  "mail_port": 587,
+  "mail_username": "mailer.arfiyandesign@gmail.com",
+  "mail_password": "arfiyandesign77",
+  "mail_from": "rizal.arfiyan.23@gmail.com",
+  "mail_from_text": "Dari Ganisda #6",
+  "mail_subject": "Ini adalah subject",
   "template_location": "template",
   "template_file": "base",
   "data_location": "dist",

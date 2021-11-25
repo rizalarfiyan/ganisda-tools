@@ -2,6 +2,7 @@ package mail
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/csv"
 	"fmt"
 	"ganisda-email-sender/config"
@@ -11,7 +12,9 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"regexp"
+	"time"
+
+	go_mail "github.com/xhit/go-simple-mail/v2"
 )
 
 type mailService struct {
@@ -23,8 +26,13 @@ type MailService interface {
 	GenerateTemplate(TemplateField) (*string, error)
 	GenerateMailCSV(string) error
 	GetCSVLocation() string
+	GetUserFileLocation(string) string
+	GetUserFileName(string) string
 	ReadMailCSV(string) ([][]string, error)
 	ValidateMailCSV([][]string) error
+	MailConnection() *go_mail.SMTPServer
+	SendMail(message MailMessage, server *go_mail.SMTPServer, userData []string)
+	ReadMailMessage(message MailMessage)
 }
 
 func NewMailService(conf *config.Config) MailService {
@@ -76,13 +84,7 @@ func (m *mailService) GenerateTemplate(field TemplateField) (*string, error) {
 	}
 
 	result := tpl.String()
-	minifier := m.htmlMinifier(result)
-	return &minifier, nil
-}
-
-func (m *mailService) htmlMinifier(html string) string {
-	re := regexp.MustCompile(`(?m)<!--(.*?)-->|\s\B`)
-	return re.ReplaceAllString(html, "")
+	return &result, nil
 }
 
 func (m *mailService) GetCSVLocation() string {
@@ -92,9 +94,13 @@ func (m *mailService) GetCSVLocation() string {
 }
 
 func (m *mailService) GetUserFileLocation(name string) string {
-	fileName := fmt.Sprint(m.config.PrefixName, " - ", name, ".", m.config.ExtensionName)
+	fileName := m.GetUserFileName(name)
 	filePath := path.Join(".", m.config.DataLocation, m.config.FileLocation, fileName)
 	return filePath
+}
+
+func (m *mailService) GetUserFileName(name string) string {
+	return fmt.Sprint(m.config.PrefixName, " - ", name, ".", m.config.ExtensionName)
 }
 
 func (m *mailService) GenerateMailCSV(filePath string) error {
@@ -169,4 +175,81 @@ func (m *mailService) ValidateMailCSV(data [][]string) error {
 		return errInvalidCSV
 	}
 	return nil
+}
+
+func (m *mailService) MailConnection() *go_mail.SMTPServer {
+	server := go_mail.NewSMTPClient()
+	server.Host = m.config.MailHost
+	server.Port = m.config.MailPort
+	server.Username = m.config.MailUsername
+	server.Password = m.config.MailPassword
+	server.Encryption = go_mail.EncryptionTLS
+	server.KeepAlive = true
+	server.ConnectTimeout = 30 * time.Second
+	server.SendTimeout = 30 * time.Second
+	server.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+	return server
+}
+
+func (m *mailService) SendMail(message MailMessage, server *go_mail.SMTPServer, userData []string) {
+	defer message.WaitGroup.Done()
+
+	userEmail := userData[0]
+	userName := userData[1]
+
+	filed := TemplateField{
+		Title: m.config.MailSubject,
+		Name:  userName,
+	}
+
+	template, err := m.GenerateTemplate(filed)
+	if err != nil {
+		message.SetMessage(err.Error())
+		return
+	}
+
+	smtpClient, err := server.Connect()
+	if err != nil {
+		message.SetMessage(err.Error())
+		return
+	}
+
+	email := go_mail.NewMSG()
+	from := fmt.Sprintf("%v <%v>", m.config.MailFromText, m.config.MailFrom)
+	email.SetFrom(from).AddTo(userEmail).SetSubject(m.config.MailSubject)
+	email.SetBody(go_mail.TextHTML, *template)
+
+	fileLocation := m.GetUserFileLocation(userName)
+	fileByte, err := ioutil.ReadFile(fileLocation)
+	if err != nil {
+		message.SetMessage(err.Error())
+		return
+	}
+
+	fileName := m.GetUserFileName(userName)
+	extension := filepath.Ext(fileLocation)
+	noDotExtension := extension[1:len(string(extension))]
+
+	email.AddAttachmentData(fileByte, fileName, noDotExtension)
+
+	if email.Error != nil {
+		message.SetMessage(err.Error())
+		return
+	}
+
+	err = email.Send(smtpClient)
+	if err != nil {
+		message.SetMessage(err.Error())
+		return
+	}
+
+	successMessage := fmt.Sprintf(emailSuccess, userName, userEmail)
+	message.SetMessage(successMessage)
+}
+
+func (m *mailService) ReadMailMessage(message MailMessage) {
+	for msg := range message.Message {
+		fmt.Println(msg)
+		fmt.Println()
+	}
 }

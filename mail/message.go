@@ -10,4 +10,6 @@ var (
 	errRowEmail         = "Error invalid email in %v"
 	errRowFullName      = "Error invalid full name in %v"
 	errFileUserNotFound = "Error file %v is not found"
+
+	emailSuccess = "Successfully sent email to %v <%v>"
 )

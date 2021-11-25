@@ -4,6 +4,7 @@ import (
 	"ganisda-email-sender/config"
 	"ganisda-email-sender/mail"
 	"ganisda-email-sender/utils"
+	"sync"
 )
 
 type appMail struct {
@@ -30,20 +31,28 @@ func (a *appMail) Run() error {
 		return err
 	}
 
-	//! not include Validate Files
 	if err = a.mail.ValidateMailCSV(data); err != nil {
 		return err
 	}
 
-	filed := mail.TemplateField{
-		Title: "Ini adalah judul",
-		Name:  "Muhamad Rizal Arfiyan",
+	emailConfig := a.mail.MailConnection()
+
+	message := mail.MailMessage{
+		WaitGroup: &sync.WaitGroup{},
+		Mutex:     &sync.Mutex{},
+		Message:   make(chan string),
 	}
 
-	_, err = a.mail.GenerateTemplate(filed)
-	if err != nil {
-		return err
+	message.WaitGroup.Add(len(data))
+	for _, val := range data {
+		go a.mail.SendMail(message, emailConfig, val)
 	}
+
+	go func() {
+		message.WaitGroup.Wait()
+		close(message.Message)
+	}()
+	a.mail.ReadMailMessage(message)
 
 	return nil
 }
