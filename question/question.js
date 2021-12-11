@@ -1,16 +1,20 @@
 class Draggable {
-  constructor(element) {
-    this.el = document.querySelector(element);
+  defaultOptions = {
+    element: "#drag",
+  };
+
+  constructor(options) {
+    this.options = Object.assign({}, this.defaultOptions, options);
+    this.el = document.querySelector(this.options.element);
     this.style = this.el.style;
     this.isMouseDown = false;
     this.mouseX = 0;
     this.mouseY = 0;
     this.elementX = 0;
     this.elementY = 0;
-    this._init();
   }
 
-  _init() {
+  eventInit() {
     this.el.addEventListener("mousedown", (event) => this._onMouseDown(event));
     this.el.addEventListener("mouseup", () => this._onMouseUp());
     document.addEventListener("mousemove", (event) => this._onMouseMove(event));
@@ -49,7 +53,7 @@ class Icons {
 
   constructor(options) {
     this.options = Object.assign({}, this.defaultOptions, options);
-    this.el = document.querySelectorAll(this.options.element)
+    this.el = document.querySelectorAll(this.options.element);
     this._init();
   }
 
@@ -96,13 +100,6 @@ class Icons {
 class QuestionController {
   defaultOptions = {
     elementComment: "#stack",
-    elementDrag: "#drag",
-    iconLibrary: Object.create(null),
-    elementIcon: "span[data-icon]",
-    iconAttrName: "data-icon",
-    iconAttrSize: "data-size",
-    defaultIcon: "times",
-    defaultIconSize: 24,
     elementModal: "[data-modal]",
     elementModalQuestion: "#question-modal",
   };
@@ -122,20 +119,23 @@ class QuestionController {
 
     // Inject
     this.icons = new Icons({
-      library: this.options.iconLibrary
-    })
-    
+      library: this.options.iconLibrary,
+    });
+    this.question = new Draggable({
+      element: this.options.elementDrag,
+    });
+
     this._init();
   }
 
   _init() {
     this.showNoComment();
-    new Draggable(this.options.elementDrag);
     this.handlePopup();
     this.formListener();
 
     // Run inject
-    this.icons.createIcons()
+    this.icons.createIcons();
+    this.question.eventInit();
   }
 
   handlePopup() {
