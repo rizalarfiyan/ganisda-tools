@@ -3,11 +3,35 @@ body {
   background-color: #f3f3f3;
 }
 
+button {
+  border: none;
+  margin: 0;
+  padding: 0;
+  width: auto;
+  overflow: visible;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: normal;
+  -webkit-font-smoothing: inherit;
+  -moz-osx-font-smoothing: inherit;
+  -webkit-appearance: none;
+}
+
+button::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+
+[data-icon] {
+  display: inline-flex;
+}
+
 /* Stack */
 .stack {
   margin: 0 auto;
   position: relative;
-  z-index: 1000;
+  z-index: 98;
   padding: 0;
   list-style: none;
   pointer-events: none;
@@ -93,4 +117,67 @@ body {
   color: #ffffff;
   padding: 10px;
   cursor: move;
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal-header {
+  padding: 0 0 10px;
+  margin: 0;
+}
+
+.modal.open {
+  visibility: visible;
+  opacity: 1;
+}
+
+.modal-bg {
+  position: fixed;
+  background: rgba(0, 0, 0, 0.15);
+  width: 100%;
+  height: 100%;
+}
+
+.modal-container {
+  border-radius: 6px;
+  background: #fff;
+  position: relative;
+  padding: 24px;
+  max-width: 620px;
+}
+
+.modal-close {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  appearance: none;
+  border-radius: 100px;
+  padding: 5px;
+  transition: .2s all ease-in-out;
+}
+
+.modal-close [data-icon] {
+  display: flex;
+}
+
+.modal-close:hover {
+  background-color: #f3f3f3;
+}
+
+.modal-exit {
+  cursor: pointer;
 }

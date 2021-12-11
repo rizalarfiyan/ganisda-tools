@@ -35,10 +35,11 @@ class QuestionController {
     dragElement: "#drag",
     iconLibrary: Object.create(null),
     iconElement: "span[data-icon]",
-    iconAttrName: 'data-icon',
-    iconAttrSize: 'data-size',
+    iconAttrName: "data-icon",
+    iconAttrSize: "data-size",
     defaultIcon: "times",
     defaultIconSize: 24,
+    popupElement: "[data-modal]",
   };
 
   constructor(options) {
@@ -47,6 +48,7 @@ class QuestionController {
     this.el = document.querySelector(this.options.commentElement);
     this.dragElement = document.querySelector(this.options.dragElement);
     this.iconsElement = document.querySelectorAll(this.options.iconElement);
+    this.popupElement = document.querySelectorAll(this.options.popupElement);
 
     this.itemsId = [];
     this.items = [];
@@ -58,22 +60,67 @@ class QuestionController {
   _init() {
     this.showNoComment();
     draggable(this.dragElement);
-    this.createIcons(); 
+    this.createIcons();
+    this.handlePopup();
   }
 
   createIcons() {
     if (this.options.iconLibrary[this.options.defaultIcon] === undefined) {
-      console.warn('Icon library not loaded!')
-      return
+      console.warn("Icon library not loaded!");
+      return;
     }
 
-    this.iconsElement.forEach(elem => {
-      const getIconSize = elem.getAttribute(this.options.iconAttrSize) || this.options.defaultIconSize
-      const getIconName = elem.getAttribute(this.options.iconAttrName)
-      const iconName = this.options.iconLibrary[getIconName] || this.options.iconLibrary[this.options.defaultIcon]
-      const baseSvg = `<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="${getIconSize}" height="${getIconSize}" viewBox="0 0 24 24" fill="currentColor"><path d="${iconName}"></path></svg>`
-      elem.insertAdjacentHTML('beforeend', baseSvg)
+    this.iconsElement.forEach((elem) => {
+      const getIconSize =
+        elem.getAttribute(this.options.iconAttrSize) ||
+        this.options.defaultIconSize;
+      const getIconName = elem.getAttribute(this.options.iconAttrName);
+      const iconName =
+        this.options.iconLibrary[getIconName] ||
+        this.options.iconLibrary[this.options.defaultIcon];
+      const baseSvg = `<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="${getIconSize}" height="${getIconSize}" viewBox="0 0 24 24" fill="currentColor"><path d="${iconName}"></path></svg>`;
+      elem.insertAdjacentHTML("beforeend", baseSvg);
     });
+  }
+
+  handlePopup() {
+    const mine = this
+    
+    this.popupElement.forEach((trigger) => {
+      trigger.addEventListener("click", function (event) {
+        event.preventDefault();
+        const modal = document.getElementById(trigger.dataset.modal);
+        modal.classList.add("open");
+        const exits = modal.querySelectorAll(".modal-exit");
+        exits.forEach(function (exit) {
+          const closeModal = () => {
+            modal.classList.remove("open");
+          }
+          
+          exit.addEventListener("click", function (event) {
+            event.preventDefault();
+            closeModal()
+          });
+
+          mine.handleEscape(closeModal)
+        });
+      });
+    });
+  }
+
+  handleEscape(callback) {
+    document.onkeydown = function (evt) {
+      evt = evt || window.event;
+      let isEscape = false;
+      if ("key" in evt) {
+        isEscape = evt.key === "Escape" || evt.key === "Esc";
+      } else {
+        isEscape = evt.keyCode === 27;
+      }
+      if (isEscape) {
+        callback()
+      }
+    };
   }
 
   update(data) {
