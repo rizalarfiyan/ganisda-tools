@@ -1,0 +1,96 @@
+/* Base Style */
+body {
+  background-color: #f3f3f3;
+}
+
+/* Stack */
+.stack {
+  margin: 0 auto;
+  position: relative;
+  z-index: 1000;
+  padding: 0;
+  list-style: none;
+  pointer-events: none;
+
+  width: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.stack_item {
+  background: #fff;
+  border-radius: 4px;
+  text-align: center;
+  overflow: hidden;
+  position: absolute;
+  display: -webkit-flex;
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+  pointer-events: auto;
+
+  transition: transform 0.35s cubic-bezier(0.39, 0.575, 0.565, 1),
+    opacity 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    scale-in 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform: scale(1.5);
+  opacity: 0;
+
+  max-width: 320px;
+  margin: 14px;
+  padding: 14px;
+  border-radius: 4px;
+}
+
+.stack_item.show {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.stack_item,
+.stack div[no-comment] {
+  animation: scale-in 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes scale-in {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Menu */
+.menu {
+  position: fixed;
+  z-index: 99;
+  top: 10px;
+  right: 10px;
+}
+
+/* Drag */
+.drag {
+  z-index: 99;
+  position: fixed;
+  top: 50px;
+  right: 10px;
+  max-width: 120px;
+  border: 1px solid red;
+  display: none;
+}
+
+.drag.show {
+  display: block;
+}
+
+.handle {
+  background: #969696;
+  color: #ffffff;
+  padding: 10px;
+  cursor: move;
+}

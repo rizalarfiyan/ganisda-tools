@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Question Controller</title>
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+  <link rel="stylesheet" type="text/css" href="./style.css">
+</head>
+
+<body>
+
+  <div id="drag" class="drag" data-drag-boundary="true">
+    <div class="handle"><span>Drag here</span></div>
+    <div id="controls" class="abs-control">
+      <button id="add">Add</button>
+      <button id="remove">Remove</button>
+      <button id="update">Update</button>
+      <button id="prev">Prev</button>
+      <button id="next">Next</button>
+    </div>
+  </div>
+
+  <div class="menu">
+    <button id="toggle-control">Control</button>
+    <button id="toggle-logger">Logger</button>
+  </div>
+
+  <div class="wrapper">
+    <div id="stack" class="stack"></div>
+  </div>
+
+  <script src="./script.js" type="text/javascript"></script>
+</body>
+
+</html>
