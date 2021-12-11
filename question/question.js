@@ -37,6 +37,62 @@ class Draggable {
   }
 }
 
+class Icons {
+  defaultOptions = {
+    library: Object.create(null),
+    element: "span[data-icon]",
+    attributeName: "data-icon",
+    attributeSize: "data-size",
+    defaultIcon: "times",
+    defaultSize: 24,
+  };
+
+  constructor(options) {
+    this.options = Object.assign({}, this.defaultOptions, options);
+    this.el = document.querySelectorAll(this.options.element)
+    this._init();
+  }
+
+  _init() {
+    if (this.options.library[this.options.defaultIcon] === undefined) {
+      console.warn("Icon library not loaded!");
+      return;
+    }
+  }
+
+  _getName(elem) {
+    return (
+      elem.getAttribute(this.options.attributeName) || this.options.defaultIcon
+    );
+  }
+
+  _getSize(elem) {
+    return (
+      elem.getAttribute(this.options.attributeSize) || this.options.defaultSize
+    );
+  }
+
+  _iconName(elem) {
+    const name = this._getName(elem);
+    return (
+      this.options.library[name] ||
+      this.options.library[this.options.defaultIcon]
+    );
+  }
+
+  _iconTemplate(name, size) {
+    return `<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="currentColor"><path d="${name}"></path></svg>`;
+  }
+
+  createIcons() {
+    this.el.forEach((elem) => {
+      const name = this._iconName(elem);
+      const size = this._getSize(elem);
+      elem.insertAdjacentHTML("beforeend", this._iconTemplate(name, size));
+    });
+  }
+}
+
 class QuestionController {
   defaultOptions = {
     elementComment: "#stack",
@@ -55,7 +111,6 @@ class QuestionController {
     this.options = Object.assign({}, this.defaultOptions, options);
 
     this.elComment = document.querySelector(this.options.elementComment);
-    this.elIcons = document.querySelectorAll(this.options.elementIcon);
     this.elModal = document.querySelectorAll(this.options.elementModal);
     this.elQuestion = document.querySelector(this.options.elementModalQuestion);
     this.form = this.elQuestion.querySelector("form");
@@ -64,34 +119,23 @@ class QuestionController {
     this.items = [];
     this.current = 0;
     this.itemsTotal = 0;
+
+    // Inject
+    this.icons = new Icons({
+      library: this.options.iconLibrary
+    })
+    
     this._init();
   }
 
   _init() {
     this.showNoComment();
     new Draggable(this.options.elementDrag);
-    this.createIcons();
     this.handlePopup();
     this.formListener();
-  }
 
-  createIcons() {
-    if (this.options.iconLibrary[this.options.defaultIcon] === undefined) {
-      console.warn("Icon library not loaded!");
-      return;
-    }
-
-    this.elIcons.forEach((elem) => {
-      const getIconSize =
-        elem.getAttribute(this.options.iconAttrSize) ||
-        this.options.defaultIconSize;
-      const getIconName = elem.getAttribute(this.options.iconAttrName);
-      const iconName =
-        this.options.iconLibrary[getIconName] ||
-        this.options.iconLibrary[this.options.defaultIcon];
-      const baseSvg = `<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="${getIconSize}" height="${getIconSize}" viewBox="0 0 24 24" fill="currentColor"><path d="${iconName}"></path></svg>`;
-      elem.insertAdjacentHTML("beforeend", baseSvg);
-    });
+    // Run inject
+    this.icons.createIcons()
   }
 
   handlePopup() {
