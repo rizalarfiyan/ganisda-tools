@@ -64,20 +64,22 @@ class Icons {
     }
   }
 
-  _getName(elem) {
+  _getName() {
     return (
-      elem.getAttribute(this.options.attributeName) || this.options.defaultIcon
+      this.elem.getAttribute(this.options.attributeName) ||
+      this.options.defaultIcon
     );
   }
 
-  _getSize(elem) {
+  _getSize() {
     return (
-      elem.getAttribute(this.options.attributeSize) || this.options.defaultSize
+      this.elem.getAttribute(this.options.attributeSize) ||
+      this.options.defaultSize
     );
   }
 
-  _iconName(elem) {
-    const name = this._getName(elem);
+  _iconName() {
+    const name = this._getName();
     return (
       this.options.library[name] ||
       this.options.library[this.options.defaultIcon]
@@ -90,6 +92,7 @@ class Icons {
 
   createIcons() {
     this.el.forEach((elem) => {
+      this.elem = elem;
       const name = this._iconName(elem);
       const size = this._getSize(elem);
       elem.insertAdjacentHTML("beforeend", this._iconTemplate(name, size));
@@ -97,10 +100,64 @@ class Icons {
   }
 }
 
+class Modal {
+  defaultOptions = {
+    element: "[data-modal]",
+    classActive: "open",
+    elementClose: ".modal-exit",
+  };
+
+  constructor(options) {
+    this.options = Object.assign({}, this.defaultOptions, options);
+    this.el = document.querySelectorAll(this.options.element);
+  }
+
+  modalInit() {
+    this.el.forEach((elem) => {
+      elem.addEventListener("click", (event) => this._handleModal(event, elem));
+    });
+  }
+
+  _handleModal(event, elem) {
+    event.preventDefault();
+    this.modal = document.getElementById(elem.dataset.modal);
+    this.class = this.modal.classList;
+    this._open();
+    this._handleClose();
+  }
+
+  _handleClose() {
+    this._shortcutClose();
+    const close = this.modal.querySelectorAll(this.options.elementClose);
+    close.forEach((event) => {
+      event.addEventListener("click", (event) => this._clickClose(event));
+    });
+  }
+
+  _open() {
+    this.class.add(this.options.classActive);
+  }
+
+  _close() {
+    this.class.remove(this.options.classActive);
+  }
+
+  _clickClose(event) {
+    event.preventDefault();
+    this._close();
+  }
+
+  _shortcutClose() {
+    shortcuts.add("esc", () => {
+      this._close();
+      shortcuts.remove("esc");
+    });
+  }
+}
+
 class QuestionController {
   defaultOptions = {
     elementComment: "#stack",
-    elementModal: "[data-modal]",
     elementModalQuestion: "#question-modal",
   };
 
@@ -108,7 +165,6 @@ class QuestionController {
     this.options = Object.assign({}, this.defaultOptions, options);
 
     this.elComment = document.querySelector(this.options.elementComment);
-    this.elModal = document.querySelectorAll(this.options.elementModal);
     this.elQuestion = document.querySelector(this.options.elementModalQuestion);
     this.form = this.elQuestion.querySelector("form");
 
@@ -121,52 +177,20 @@ class QuestionController {
     this.icons = new Icons({
       library: this.options.iconLibrary,
     });
-    this.question = new Draggable({
-      element: this.options.elementDrag,
-    });
+    this.question = new Draggable();
+    this.modal = new Modal();
 
     this._init();
   }
 
   _init() {
     this.showNoComment();
-    this.handlePopup();
     this.formListener();
 
     // Run inject
     this.icons.createIcons();
     this.question.eventInit();
-  }
-
-  handlePopup() {
-    this.elModal.forEach((trigger) => {
-      trigger.addEventListener("click", (event) =>
-        this.modalOpen(event, trigger)
-      );
-    });
-  }
-
-  modalOpen(event, trigger) {
-    event.preventDefault();
-    const modal = document.getElementById(trigger.dataset.modal);
-    modal.classList.add("open");
-
-    const exits = modal.querySelectorAll(".modal-exit");
-    exits.forEach((exit) => {
-      exit.addEventListener("click", (event) => {
-        this.modalClose(event, modal);
-      });
-      shortcuts.add("esc", () => {
-        this.modalClose(event, modal);
-        shortcuts.remove("esc");
-      });
-    });
-  }
-
-  modalClose(event, modal) {
-    event.preventDefault();
-    modal.classList.remove("open");
-    return this;
+    this.modal.modalInit();
   }
 
   formListener() {
