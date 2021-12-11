@@ -1,31 +1,39 @@
-function draggable(element) {
-  let isMouseDown = false;
-  let mouseX = 0;
-  let mouseY = 0;
-  let elementX = 0;
-  let elementY = 0;
-  element.addEventListener("mousedown", onMouseDown);
-  element.addEventListener("mouseup", onMouseUp);
-  document.addEventListener("mousemove", onMouseMove);
-
-  function onMouseDown(event) {
-    mouseX = event.clientX;
-    mouseY = event.clientY;
-    isMouseDown = true;
+class Draggable {
+  constructor(element) {
+    this.el = document.querySelector(element);
+    this.style = this.el.style;
+    this.isMouseDown = false;
+    this.mouseX = 0;
+    this.mouseY = 0;
+    this.elementX = 0;
+    this.elementY = 0;
+    this._init();
   }
 
-  function onMouseUp() {
-    isMouseDown = false;
-    elementX = parseInt(element.style.right) || 0;
-    elementY = parseInt(element.style.top) || 0;
+  _init() {
+    this.el.addEventListener("mousedown", (event) => this._onMouseDown(event));
+    this.el.addEventListener("mouseup", () => this._onMouseUp());
+    document.addEventListener("mousemove", (event) => this._onMouseMove(event));
   }
 
-  function onMouseMove(event) {
-    if (!isMouseDown) return;
-    let deltaX = event.clientX - mouseX;
-    let deltaY = event.clientY - mouseY;
-    element.style.right = elementX - deltaX + "px";
-    element.style.top = elementY + deltaY + "px";
+  _onMouseDown(event) {
+    this.mouseX = event.clientX;
+    this.mouseY = event.clientY;
+    this.isMouseDown = true;
+  }
+
+  _onMouseUp() {
+    this.isMouseDown = false;
+    this.elementX = parseInt(this.style.right) || 0;
+    this.elementY = parseInt(this.style.top) || 0;
+  }
+
+  _onMouseMove(event) {
+    if (!this.isMouseDown) return;
+    let deltaX = event.clientX - this.mouseX;
+    let deltaY = event.clientY - this.mouseY;
+    this.style.right = this.elementX - deltaX + "px";
+    this.style.top = this.elementY + deltaY + "px";
   }
 }
 
@@ -47,7 +55,6 @@ class QuestionController {
     this.options = Object.assign({}, this.defaultOptions, options);
 
     this.elComment = document.querySelector(this.options.elementComment);
-    this.elDrag = document.querySelector(this.options.elementDrag);
     this.elIcons = document.querySelectorAll(this.options.elementIcon);
     this.elModal = document.querySelectorAll(this.options.elementModal);
     this.elQuestion = document.querySelector(this.options.elementModalQuestion);
@@ -62,7 +69,7 @@ class QuestionController {
 
   _init() {
     this.showNoComment();
-    draggable(this.elDrag);
+    new Draggable(this.options.elementDrag);
     this.createIcons();
     this.handlePopup();
     this.formListener();
@@ -88,28 +95,34 @@ class QuestionController {
   }
 
   handlePopup() {
-    const mine = this;
-
     this.elModal.forEach((trigger) => {
-      trigger.addEventListener("click", function (event) {
-        event.preventDefault();
-        const modal = document.getElementById(trigger.dataset.modal);
-        modal.classList.add("open");
-        const exits = modal.querySelectorAll(".modal-exit");
-        exits.forEach(function (exit) {
-          const closeModal = () => {
-            modal.classList.remove("open");
-          };
+      trigger.addEventListener("click", (event) =>
+        this.modalOpen(event, trigger)
+      );
+    });
+  }
 
-          exit.addEventListener("click", function (event) {
-            event.preventDefault();
-            closeModal();
-          });
+  modalOpen(event, trigger) {
+    event.preventDefault();
+    const modal = document.getElementById(trigger.dataset.modal);
+    modal.classList.add("open");
 
-          mine.handleEscape(closeModal);
-        });
+    const exits = modal.querySelectorAll(".modal-exit");
+    exits.forEach((exit) => {
+      exit.addEventListener("click", (event) => {
+        this.modalClose(event, modal);
+      });
+      shortcuts.add("esc", () => {
+        this.modalClose(event, modal);
+        shortcuts.remove("esc");
       });
     });
+  }
+
+  modalClose(event, modal) {
+    event.preventDefault();
+    modal.classList.remove("open");
+    return this;
   }
 
   formListener() {
@@ -129,21 +142,6 @@ class QuestionController {
       pairs[name] = value;
     }
     return pairs;
-  }
-
-  handleEscape(callback) {
-    document.onkeydown = function (evt) {
-      evt = evt || window.event;
-      let isEscape = false;
-      if ("key" in evt) {
-        isEscape = evt.key === "Escape" || evt.key === "Esc";
-      } else {
-        isEscape = evt.keyCode === 27;
-      }
-      if (isEscape) {
-        callback();
-      }
-    };
   }
 
   update(data) {
