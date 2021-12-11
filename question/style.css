@@ -136,8 +136,7 @@ button::-moz-focus-inner {
 }
 
 .modal-header {
-  padding: 0 0 10px;
-  margin: 0;
+  margin: 0 0 24px;
 }
 
 .modal.open {
@@ -157,7 +156,8 @@ button::-moz-focus-inner {
   background: #fff;
   position: relative;
   padding: 24px;
-  max-width: 620px;
+  max-width: 480px;
+  width: 100%;
 }
 
 .modal-close {
@@ -167,7 +167,7 @@ button::-moz-focus-inner {
   appearance: none;
   border-radius: 100px;
   padding: 5px;
-  transition: .2s all ease-in-out;
+  transition: 0.2s all ease-in-out;
 }
 
 .modal-close [data-icon] {
@@ -180,4 +180,35 @@ button::-moz-focus-inner {
 
 .modal-exit {
   cursor: pointer;
+}
+
+/* Form */
+.question-form {
+  width: 100%;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 6px;
+}
+
+input,
+textarea {
+  border: 1px solid #333;
+  font-size: 1rem;
+  padding: 10px;
+  width: calc(100% - 20px);
+  border-radius: 4px;
+}
+
+input:focus,
+textarea:focus {
+  border-color: blue;
 }

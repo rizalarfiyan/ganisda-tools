@@ -20,7 +20,7 @@
       <button id="update">Update</button>
       <button id="prev">Prev</button>
       <button id="next">Next</button>
-      <button data-modal="question-popup">Add</button>
+      <button data-modal="question-modal">Add</button>
     </div>
   </div>
 
@@ -33,12 +33,22 @@
     <div id="stack" class="stack"></div>
   </div>
 
-  <div class="modal" id="question-popup">
+  <div class="modal" id="question-modal">
     <div class="modal-bg modal-exit"></div>
     <div class="modal-container">
       <h1 class="modal-header">Question</h1>
       <div class="modal-content">
-        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Harum iure sit optio. Qui, minima? Iure beatae, dolore, sequi voluptates incidunt fugit, debitis odit fugiat aspernatur vitae sit sint quos pariatur. Molestiae doloribus repellat numquam provident culpa tenetur laborum ullam quos earum dolores non harum at eveniet ducimus libero, illum laboriosam? Aperiam, fugiat alias corrupti soluta dolorum libero dolores ea eaque culpa sapiente id veritatis commodi nulla, incidunt inventore, quos optio. Facere quisquam in vitae ad ipsa quas sit maxime illum quo, facilis, sapiente praesentium, saepe architecto quos. Ducimus corporis optio minus alias quaerat harum, dignissimos cum, velit facilis veniam eveniet!
+        <form class="question-form">
+          <div class="form-group">
+            <label for="question_name">Nama:</label>
+            <input type="text" id="question_name" name="name" placeholder="Nama" />
+          </div>
+          <div class="form-group">
+            <label for="question_text">Pertanyaan:</label>
+            <textarea id="question_text" name="question" placeholder="Pertanyaan" col="100"></textarea>
+          </div>
+          <button>Submit</button>
+        </form>
       </div>
       <button class="modal-close modal-exit">
         <span data-icon="dismis"></span>

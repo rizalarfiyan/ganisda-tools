@@ -31,24 +31,27 @@ function draggable(element) {
 
 class QuestionController {
   defaultOptions = {
-    commentElement: "#stack",
-    dragElement: "#drag",
+    elementComment: "#stack",
+    elementDrag: "#drag",
     iconLibrary: Object.create(null),
-    iconElement: "span[data-icon]",
+    elementIcon: "span[data-icon]",
     iconAttrName: "data-icon",
     iconAttrSize: "data-size",
     defaultIcon: "times",
     defaultIconSize: 24,
-    popupElement: "[data-modal]",
+    elementModal: "[data-modal]",
+    elementModalQuestion: "#question-modal",
   };
 
   constructor(options) {
     this.options = Object.assign({}, this.defaultOptions, options);
 
-    this.el = document.querySelector(this.options.commentElement);
-    this.dragElement = document.querySelector(this.options.dragElement);
-    this.iconsElement = document.querySelectorAll(this.options.iconElement);
-    this.popupElement = document.querySelectorAll(this.options.popupElement);
+    this.elComment = document.querySelector(this.options.elementComment);
+    this.elDrag = document.querySelector(this.options.elementDrag);
+    this.elIcons = document.querySelectorAll(this.options.elementIcon);
+    this.elModal = document.querySelectorAll(this.options.elementModal);
+    this.elQuestion = document.querySelector(this.options.elementModalQuestion);
+    this.form = this.elQuestion.querySelector("form");
 
     this.itemsId = [];
     this.items = [];
@@ -59,9 +62,10 @@ class QuestionController {
 
   _init() {
     this.showNoComment();
-    draggable(this.dragElement);
+    draggable(this.elDrag);
     this.createIcons();
     this.handlePopup();
+    this.formListener();
   }
 
   createIcons() {
@@ -70,7 +74,7 @@ class QuestionController {
       return;
     }
 
-    this.iconsElement.forEach((elem) => {
+    this.elIcons.forEach((elem) => {
       const getIconSize =
         elem.getAttribute(this.options.iconAttrSize) ||
         this.options.defaultIconSize;
@@ -84,9 +88,9 @@ class QuestionController {
   }
 
   handlePopup() {
-    const mine = this
-    
-    this.popupElement.forEach((trigger) => {
+    const mine = this;
+
+    this.elModal.forEach((trigger) => {
       trigger.addEventListener("click", function (event) {
         event.preventDefault();
         const modal = document.getElementById(trigger.dataset.modal);
@@ -95,17 +99,36 @@ class QuestionController {
         exits.forEach(function (exit) {
           const closeModal = () => {
             modal.classList.remove("open");
-          }
-          
+          };
+
           exit.addEventListener("click", function (event) {
             event.preventDefault();
-            closeModal()
+            closeModal();
           });
 
-          mine.handleEscape(closeModal)
+          mine.handleEscape(closeModal);
         });
       });
     });
+  }
+
+  formListener() {
+    this.form.addEventListener("submit", (event) => this.handleQuestion(event));
+  }
+
+  handleQuestion(event) {
+    event.preventDefault();
+    console.log(this.serializeJSON(this.form));
+    this.elQuestion.classList.remove("open");
+  }
+
+  serializeJSON(form) {
+    const formData = new FormData(form);
+    const pairs = {};
+    for (const [name, value] of formData) {
+      pairs[name] = value;
+    }
+    return pairs;
   }
 
   handleEscape(callback) {
@@ -118,7 +141,7 @@ class QuestionController {
         isEscape = evt.keyCode === 27;
       }
       if (isEscape) {
-        callback()
+        callback();
       }
     };
   }
@@ -148,7 +171,7 @@ class QuestionController {
         div.classList.add("stack_item");
         div.innerText = data[key].text;
         div.setAttribute("data-id", data[key].id);
-        this.el.appendChild(div);
+        this.elComment.appendChild(div);
       } else {
         this.getElemId(data[key].id).innerText = data[key].text;
       }
@@ -185,7 +208,7 @@ class QuestionController {
   }
 
   getElemId(id) {
-    return this.el.querySelector(`.stack_item[data-id="${id}"]`);
+    return this.elComment.querySelector(`.stack_item[data-id="${id}"]`);
   }
 
   getUpdateElement() {
@@ -198,7 +221,7 @@ class QuestionController {
   }
 
   updateElement() {
-    this.items = [].slice.call(this.el.children);
+    this.items = [].slice.call(this.elComment.children);
     this.itemsTotal = this.items.length;
   }
 
@@ -207,7 +230,7 @@ class QuestionController {
       const div = document.createElement("div");
       div.innerText = "No comment!";
       div.setAttribute("no-comment", true);
-      this.el.appendChild(div);
+      this.elComment.appendChild(div);
     }
   }
 
@@ -219,7 +242,7 @@ class QuestionController {
   }
 
   isNoComment() {
-    const elem = this.el.querySelector("[no-comment]");
+    const elem = this.elComment.querySelector("[no-comment]");
     if (elem != null) return elem;
     return false;
   }
