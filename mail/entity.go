@@ -5,6 +5,8 @@ import "sync"
 type TemplateField struct {
 	Title string
 	Name  string
+	Role  string
+	Url   string
 }
 
 type MailMessage struct {
