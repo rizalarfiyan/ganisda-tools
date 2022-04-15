@@ -169,9 +169,9 @@ func (m *mailService) ValidateMailCSV(data [][]string) error {
 			row := fmt.Sprint("A", numCol)
 			errorRow = append(errorRow, fmt.Sprintf(errRowEmail, row, email))
 		}
-		if !utils.IsAlphaSpace(name) {
+		if !utils.IsName(name) {
 			row := fmt.Sprint("B", numCol)
-			errorRow = append(errorRow, fmt.Sprintf(errRowFullName, row, name))
+			errorRow = append(errorRow, fmt.Sprintf(errRowName, row, name))
 		}
 		if !utils.IsAlphaSpace(role) {
 			row := fmt.Sprint("C", numCol)
