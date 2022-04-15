@@ -76,6 +76,8 @@ func (m *mailService) GenerateTemplate(field TemplateField) (*string, error) {
 	data := map[string]interface{}{
 		"title": field.Title,
 		"name":  field.Name,
+		"role":  field.Role,
+		"url":   field.Url,
 	}
 
 	var tpl bytes.Buffer
@@ -109,7 +111,7 @@ func (m *mailService) GenerateMailCSV(filePath string) error {
 	}
 
 	strCSV := [][]string{
-		{"Email", "Nama lengkap"},
+		{"Email", "Nama", "Peran", "Url"},
 	}
 
 	f, err := os.Create(filePath)
@@ -155,17 +157,33 @@ func (m *mailService) ValidateMailCSV(data [][]string) error {
 		numCol := idx + 2
 		email := col[0]
 		name := col[1]
+		role := col[2]
+		url := col[3]
 
-		if utils.IsEmail(email) {
-			row := fmt.Sprint("A", numCol)
-			errorRow = append(errorRow, fmt.Sprintf(errRowEmail, row))
+		// SKIP empty col and rows
+		if utils.IsEmptyString(email) && utils.IsEmptyString(name) && utils.IsEmptyString(role) && utils.IsEmptyString(url) {
+			continue
 		}
-		if utils.IsAlphaSpace(name) {
+
+		if !utils.IsEmail(email) {
+			row := fmt.Sprint("A", numCol)
+			errorRow = append(errorRow, fmt.Sprintf(errRowEmail, row, email))
+		}
+		if !utils.IsAlphaSpace(name) {
 			row := fmt.Sprint("B", numCol)
-			errorRow = append(errorRow, fmt.Sprintf(errRowFullName, row))
+			errorRow = append(errorRow, fmt.Sprintf(errRowFullName, row, name))
+		}
+		if !utils.IsAlphaSpace(role) {
+			row := fmt.Sprint("C", numCol)
+			errorRow = append(errorRow, fmt.Sprintf(errRowRole, row, role))
+		}
+		if !utils.IsUrl(url) {
+			row := fmt.Sprint("D", numCol)
+			errorRow = append(errorRow, fmt.Sprintf(errRowUrl, row, url))
 		}
 		if !utils.FileIsExist(m.GetUserFileLocation(name)) {
-			errorRow = append(errorRow, fmt.Sprintf(errFileUserNotFound, name))
+			fileName := m.GetUserFileName(name)
+			errorRow = append(errorRow, fmt.Sprintf(errFileUserNotFound, fileName, name))
 		}
 	}
 	if len(errorRow) != 0 {
@@ -196,10 +214,15 @@ func (m *mailService) SendMail(message MailMessage, server *go_mail.SMTPServer, 
 
 	userEmail := userData[0]
 	userName := userData[1]
+	userRole := userData[2]
+	userUrl := userData[3]
 
+	titleName := fmt.Sprintf("%v %v", m.config.MailSubject, userName)
 	filed := TemplateField{
-		Title: m.config.MailSubject,
+		Title: titleName,
 		Name:  userName,
+		Role:  userRole,
+		Url:   userUrl,
 	}
 
 	template, err := m.GenerateTemplate(filed)
@@ -216,7 +239,7 @@ func (m *mailService) SendMail(message MailMessage, server *go_mail.SMTPServer, 
 
 	email := go_mail.NewMSG()
 	from := fmt.Sprintf("%v <%v>", m.config.MailFromText, m.config.MailFrom)
-	email.SetFrom(from).AddTo(userEmail).SetSubject(m.config.MailSubject)
+	email.SetFrom(from).AddTo(userEmail).SetSubject(titleName)
 	email.SetBody(go_mail.TextHTML, *template)
 
 	fileLocation := m.GetUserFileLocation(userName)
