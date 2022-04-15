@@ -8,7 +8,7 @@ var (
 	errInvalidCSV        = errors.New("error, someting problem in csv file")
 
 	errRowEmail         = "Error invalid email in %v (%v)"
-	errRowFullName      = "Error invalid full name in %v (%v)"
+	errRowName          = "Error invalid name in %v (%v)"
 	errRowRole          = "Error invalid role in %v (%v)"
 	errRowUrl           = "Error invalid url in %v (%v)"
 	errFileUserNotFound = "Error file %v is not found in path %v"
