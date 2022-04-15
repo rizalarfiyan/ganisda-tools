@@ -9,7 +9,6 @@
   "template_location": "template",
   "template_file": "base",
   "data_location": "dist",
-  "file_location": "files",
   "prefix_name": "Sertifikat GANISDA #6",
   "extension_name": "pdf",
   "list_data": "users"
